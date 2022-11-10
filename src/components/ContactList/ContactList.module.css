@@ -1,0 +1,13 @@
+.contactListBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    width: 300px;
+}
+
+.contactListBlock > ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
