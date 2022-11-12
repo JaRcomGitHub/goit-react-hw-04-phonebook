@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { nanoid } from 'nanoid';
 import ContactForm from "./ContactForm";
 import ContactList from "./ContactList";
 import initialContacts from './contacts.json'
@@ -17,7 +18,7 @@ class App extends Component {
     
     if (parsedContacts) {
       this.setState({ contacts: parsedContacts });
-      console.log("restore")
+      //console.log("restore")
     }
   };
 
@@ -27,6 +28,19 @@ class App extends Component {
     };
   };
 
+  onAlert = name =>  {
+    window.alert(`${name} is already in contacts.`);
+  }
+  
+  checkContact = (name) => {
+    const { contacts } = this.state;
+    const normolizedName = name.toLowerCase();
+
+    return contacts.some(contact =>
+      contact.name.toLowerCase().includes(normolizedName)
+    );
+  }
+  
   deleteContact = (contactId) => {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.id !== contactId),
@@ -34,9 +48,14 @@ class App extends Component {
   };
   
   formSubmitHandler = data => {
+    if (this.checkContact(data.name)) {
+      this.onAlert(data.name);
+      return false;
+    }
     this.setState(prevState => ({
-      contacts: [...prevState.contacts, data]
+        contacts: [...prevState.contacts, { id: nanoid(), ...data }]
     }));
+    return true;
   };
 
   changeFilter = event => {
@@ -59,7 +78,7 @@ class App extends Component {
     return (
       <div>
         <h1>Phonebook</h1>
-        <ContactForm contacts={contacts} onSubmit={this.formSubmitHandler} />
+        <ContactForm onSubmit={this.formSubmitHandler} />
 
         <h2>Contacts</h2>
         {contacts.length > 0  &&
