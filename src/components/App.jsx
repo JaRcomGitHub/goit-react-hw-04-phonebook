@@ -1,39 +1,31 @@
-import React, { Component } from "react";
+import { useState, useEffect } from "react";
 import { nanoid } from 'nanoid';
 import ContactForm from "./ContactForm";
 import ContactList from "./ContactList";
-import initialContacts from './contacts.json'
+// import initialContacts from './contacts.json'
 import Filter from "./Filter"
 
-class App extends Component {
-  state = {
-    // contacts: [],
-    contacts: initialContacts,
-    filter: '',
-  };
+export default function App() {
+  const localContacts = () => {
+    const localContacts = localStorage.getItem('contacts');
+    const parsedContacts = JSON.parse(localContacts);
+    //console.log("restore");
+    return parsedContacts ? parsedContacts : [];//[] -> initialContacts
+  }
 
-  componentDidMount() {
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
-    
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-      //console.log("restore")
-    }
-  };
+  const [contacts, setContacts] = useState(localContacts);
+  const [filter, setFilter] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    };
-  };
+  useEffect(() => {
+    //console.log("Update");
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  onAlert = name =>  {
+  const onAlert = name =>  {
     window.alert(`${name} is already in contacts.`);
   }
   
-  checkContact = (name) => {
-    const { contacts } = this.state;
+  const checkContact = (name) => {
     const normolizedName = name.toLowerCase();
 
     return contacts.some(contact =>
@@ -41,29 +33,24 @@ class App extends Component {
     );
   }
   
-  deleteContact = (contactId) => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
+  const deleteContact = (contactId) => {
+    setContacts(contacts.filter(contact => contact.id !== contactId));
   };
   
-  formSubmitHandler = data => {
-    if (this.checkContact(data.name)) {
-      this.onAlert(data.name);
+  const formSubmitHandler = data => {
+    if (checkContact(data.name)) {
+      onAlert(data.name);
       return false;
     }
-    this.setState(prevState => ({
-        contacts: [...prevState.contacts, { id: nanoid(), ...data }]
-    }));
+    setContacts(prevContacts => [...prevContacts, { id: nanoid(), ...data }]);
     return true;
   };
 
-  changeFilter = event => {
-    this.setState({ filter: event.currentTarget.value });
+  const changeFilter = event => {
+    setFilter(event.currentTarget.value);
   };
 
-  getFilteredContacts = () => {
-    const { contacts, filter } = this.state;
+  const getFilteredContacts = () => {
     const normolizedFilter = filter.toLowerCase();
 
     return contacts.filter(contact =>
@@ -71,29 +58,24 @@ class App extends Component {
     );
   }
 
-  render() {
-    const { contacts, filter } = this.state;
-    const filteredContacts = this.getFilteredContacts();
+  const filteredContacts = getFilteredContacts();
 
-    return (
-      <div>
-        <h1>Phonebook</h1>
-        <ContactForm onSubmit={this.formSubmitHandler} />
+  return (
+    <div>
+      <h1>Phonebook</h1>
+      <ContactForm onSubmit={formSubmitHandler} />
 
-        <h2>Contacts</h2>
-        {contacts.length > 0  &&
-          <Filter
-            value={filter}
-            onChange={this.changeFilter} />
-        }
-        {filteredContacts.length > 0 &&
-          <ContactList
-            contacts={filteredContacts}
-            onDeleteContact={this.deleteContact} />
-        }
-      </div>
-    );
-  };
+      <h2>Contacts</h2>
+      {contacts.length > 0  &&
+        <Filter
+          value={filter}
+          onChange={changeFilter} />
+      }
+      {filteredContacts.length > 0 &&
+        <ContactList
+          contacts={filteredContacts}
+          onDeleteContact={deleteContact} />
+      }
+    </div>
+  );
 };
-
-export default App;
