@@ -5,14 +5,14 @@ import ContactList from "./ContactList";
 // import initialContacts from './contacts.json'
 import Filter from "./Filter"
 
-export default function App() {
-  const localContacts = () => {
-    const localContacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(localContacts);
-    //console.log("restore");
-    return parsedContacts ? parsedContacts : [];//[] -> initialContacts
-  }
+const localContacts = () => {
+  const localContacts = localStorage.getItem('contacts');
+  const parsedContacts = JSON.parse(localContacts);
+  //console.log("restore");
+  return parsedContacts ? parsedContacts : [];//[] -> initialContacts
+}
 
+export default function App() {
   const [contacts, setContacts] = useState(localContacts);
   const [filter, setFilter] = useState('');
 
